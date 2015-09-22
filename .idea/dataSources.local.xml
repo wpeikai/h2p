@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="MySQL - hubway@localhost" uuid="9d5a211c-fbfd-495e-8689-061fa0e4e7cd">
+      <secret-storage>master_key</secret-storage>
+      <user-name>root</user-name>
+      <schema-pattern>hubway.*</schema-pattern>
+      <default-schemas>hubway.*</default-schemas>
+    </data-source>
+  </component>
+</project>

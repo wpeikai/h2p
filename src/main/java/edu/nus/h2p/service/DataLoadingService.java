@@ -4,14 +4,15 @@ import edu.nus.h2p.domain.HubwayTrip;
 import edu.nus.h2p.domain.IHubwayTripDAO;
 import edu.nus.h2p.model.VolumeDomainObject;
 import edu.nus.h2p.model.VolumeItem;
+import edu.nus.h2p.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Hao on 20/9/2015.
@@ -21,17 +22,17 @@ import java.util.*;
 public class DataLoadingService {
     @Autowired
     IHubwayTripDAO hubwayTripDAO;
-    private static final DateFormat format = new SimpleDateFormat("yyyymmdd", Locale.ENGLISH);
-    @Value("${startDate}")
+
+    @Value("${start.date}")
     private String startDateStr;
-    @Value("${endDate}")
+    @Value("${end.date}")
     private String endDateStr;
 
     private static final long MINUTE_IN_MINI_SECOND = 60000;
-    public Map<Integer, Map<Long, VolumeDomainObject>> createVolumeDomainList() throws ParseException {
+    public Map<Integer, Map<Long, VolumeDomainObject>> createVolumeDomainList()  {
         Map<Integer, Map<Long, VolumeDomainObject>> volumeDomainObjectMap = new HashMap<>();
-        Date startDate = format.parse(startDateStr);
-        Date endDate = format.parse(endDateStr);
+        Date startDate = DateUtil.parseDateByFormat(startDateStr);
+        Date endDate = DateUtil.parseDateByFormat(endDateStr);
         List<HubwayTrip> hubwayTrips = hubwayTripDAO.getHubwayTripInTimeRange(startDate, endDate);
 
         for(HubwayTrip hubwayTrip: hubwayTrips){

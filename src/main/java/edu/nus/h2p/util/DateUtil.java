@@ -11,6 +11,7 @@ public class DateUtil {
     private static final Logger logger = Logger.getLogger(DateUtil.class.getName());
     private static final DateFormat format = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
 
+    public static final long MINUTE_IN_MINI_SECOND = 60000;
     public static Date parseDateByFormat(String dateStr){
         Date date = null;
         try {
@@ -19,5 +20,9 @@ public class DateUtil {
             logger.severe("dateStr " + dateStr + " parse to format: " + format.toString() + " failed");
         }
         return date;
+    }
+
+    public static Date addTime(Date date, long dateToAdd){
+        return new Date(date.getTime() + dateToAdd);
     }
 }

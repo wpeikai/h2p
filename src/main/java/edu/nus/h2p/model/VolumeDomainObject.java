@@ -11,7 +11,6 @@ import java.util.Date;
 public class VolumeDomainObject {
     private Date time;
     private IData data;
-    private int key;
 
     public Date getTime() {
         return time;
@@ -29,15 +28,8 @@ public class VolumeDomainObject {
         this.data = data;
     }
 
-    public int getKey() {
-        return key;
-    }
-
-    public void setKey(int key) {
-        this.key = key;
-    }
-
-    public static int computeKey(int start, int end){
-        return start * 1000 + end;
+    @Override
+    public String toString(){
+        return "time: " + time.toString() + ", data:" + (data!=null?data.getValue():-1);
     }
 }

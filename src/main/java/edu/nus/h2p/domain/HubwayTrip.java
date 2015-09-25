@@ -11,6 +11,17 @@ public class HubwayTrip {
     private int startStation;
     private int endStation;
 
+    public HubwayTrip(){
+
+    }
+
+    public HubwayTrip(Date startTime, Date endTime, int startStation, int endStation) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.startStation = startStation;
+        this.endStation = endStation;
+    }
+
     public Date getStartTime() {
         return startTime;
     }

@@ -4,6 +4,7 @@ import java.util.Date;
 
 /**
  * Created by Hao on 20/9/2015.
+ *
  */
 public class HubwayTrip {
     private Date startTime;

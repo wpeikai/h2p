@@ -9,7 +9,7 @@ public class NormalDtw implements IDtw {
         int m = seq2.length;
         int K = 1;
 
-        double accumulatedDistance = 0.0;
+        double accumulatedDistance;
 
         double[][] d = new double[n][m];	// local distances
         double[][] D = new double[n][m];	// global distances
@@ -42,7 +42,7 @@ public class NormalDtw implements IDtw {
 
         int i = n - 1;
         int j = m - 1;
-        int minIndex = 1;
+        int minIndex;
 
         while ((i + j) != 0) {
             if (i == 0) {

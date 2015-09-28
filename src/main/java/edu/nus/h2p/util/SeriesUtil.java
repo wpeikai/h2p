@@ -9,6 +9,7 @@ import java.util.Map;
 
 /**
  * Created by Hao on 28/9/2015.
+ * Series utilities methods
  */
 public class SeriesUtil {
     public static double [] getSeriesValueArray(Map<Long, VolumeDomainObject> valueMap){

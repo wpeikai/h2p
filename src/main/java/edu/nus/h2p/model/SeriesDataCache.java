@@ -11,22 +11,22 @@ import java.util.Map;
  */
 @Component
 public class SeriesDataCache {
-    private Map<Long, VolumeDomainObject> fullSeries;
-    private Map<Long, VolumeDomainObject> querySeries;
+    private Series fullSeries;
+    private Series querySeries;
 
-    public Map<Long, VolumeDomainObject> getFullSeries() {
+    public Series getFullSeries() {
         return fullSeries;
     }
 
-    public void setFullSeries(Map<Long, VolumeDomainObject> fullSeries) {
+    public void setFullSeries(Series fullSeries) {
         this.fullSeries = fullSeries;
     }
 
-    public Map<Long, VolumeDomainObject> getQuerySeries() {
+    public Series getQuerySeries() {
         return querySeries;
     }
 
-    public void setQuerySeries(Map<Long, VolumeDomainObject> querySeries) {
+    public void setQuerySeries(Series querySeries) {
         this.querySeries = querySeries;
 
     }

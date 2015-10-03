@@ -49,6 +49,12 @@
             <version>${junit.version}</version>
         </dependency>
 
+        <!-- Gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>1.7.1</version>
+        </dependency>
         <!-- MySQL database driver -->
         <dependency>
             <groupId>mysql</groupId>

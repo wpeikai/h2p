@@ -2,19 +2,14 @@ package edu.nus.h2p.service;
 
 import edu.nus.h2p.domain.HubwayTrip;
 import edu.nus.h2p.domain.IHubwayTripDAO;
-import edu.nus.h2p.model.SeriesDataCache;
-import edu.nus.h2p.model.VolumeDomainObject;
-import edu.nus.h2p.model.VolumeItem;
+import edu.nus.h2p.model.*;
 import edu.nus.h2p.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Hao on 20/9/2015.
@@ -35,21 +30,23 @@ public class DataLoadingService {
     private long sampleIntervalInMin;
 
     private long sampleInterval;
-
-
+    private int sampleNumber;
+    private Date startDate;
+    private Date endDate;
     @PostConstruct
     public void init(){
         sampleInterval = sampleIntervalInMin * DateUtil.MINUTE_IN_MINI_SECOND;
+        startDate = DateUtil.parseDateByFormat(startDateStr);
+        endDate = DateUtil.parseDateByFormat(endDateStr);
+        sampleNumber = (int) ((endDate.getTime() - startDate.getTime())/sampleInterval);
     }
 
     public void createVolumeDomainList(int ensembleLength)  {
-        Date startDate = DateUtil.parseDateByFormat(startDateStr);
-        Date queryEndDate = DateUtil.parseDateByFormat(endDateStr);
         long backwardStepDateValue = sampleInterval * ensembleLength;
-        Date endDate = DateUtil.addTime(queryEndDate, backwardStepDateValue);
-        List<HubwayTrip> hubwayTrips = loadRawData(startDate, endDate);
-        Map<Long, VolumeDomainObject> dataSeries = buildMapByRawData(hubwayTrips);
-        addDataToCache(dataSeries, ensembleLength, endDate);
+        Date totalEndDate = DateUtil.addTime(endDate, backwardStepDateValue);
+        List<HubwayTrip> hubwayTrips = loadRawData(startDate, totalEndDate);
+        Series dataSeries = buildSeriesByRawData(hubwayTrips, ensembleLength);
+        addDataToCache(dataSeries);
     }
 
     public void createVolumeDomainList(int startStn, int endStn, int ensembleLength)  {
@@ -58,8 +55,8 @@ public class DataLoadingService {
         long backwardStepDateValue = sampleInterval * ensembleLength;
         Date endDate = DateUtil.addTime(queryEndDate, backwardStepDateValue);
         List<HubwayTrip> hubwayTrips = loadRawData(startDate, endDate, startStn, endStn);
-        Map<Long, VolumeDomainObject> dataSeries = buildMapByRawData(hubwayTrips);
-        addDataToCache(dataSeries, ensembleLength, endDate);
+        Series dataSeries = buildSeriesByRawData(hubwayTrips, ensembleLength);
+        addDataToCache(dataSeries);
     }
 
     public List<HubwayTrip> loadRawData(Date startDate,Date endDate, int startStn, int endStn){
@@ -70,38 +67,23 @@ public class DataLoadingService {
         return hubwayTripDAO.getHubwayTripInTimeRange(startDate, endDate);
     }
 
-    public Map<Long, VolumeDomainObject> buildMapByRawData(List<HubwayTrip> hubwayTripList){
-        Map<Long, VolumeDomainObject> timeVolumeMap = new HashMap<>();
+    public Series buildSeriesByRawData(List<HubwayTrip> hubwayTripList, int ensembleLength){
+        Series dataSeries = new Series(startDate.getTime(), sampleInterval, sampleNumber + ensembleLength);
         for(HubwayTrip hubwayTrip: hubwayTripList){
             long rawTime = hubwayTrip.getStartTime().getTime();
             long time = rawTime - (rawTime)%sampleInterval;
-            while (time <= hubwayTrip.getEndTime().getTime()){
-                VolumeDomainObject vdo;
-                if(!timeVolumeMap.containsKey(time)){
-                    vdo = new VolumeDomainObject();
-                    vdo.setTime(new Date(time));
-                    vdo.setData(new VolumeItem());
-                    ((VolumeItem)vdo.getData()).setValue(1);
-                    timeVolumeMap.put(time, vdo);
-                }else{
-                    vdo = timeVolumeMap.get(time);
-                    vdo.getData().increaseValue();
-                }
+            while (time < hubwayTrip.getEndTime().getTime()){
+                dataSeries.increaseDataValue (time);
                 time += sampleInterval;
             }
         }
-        return timeVolumeMap;
+        return dataSeries;
     }
 
-    private void addDataToCache(Map<Long, VolumeDomainObject> series, int backwardStep, Date endTime) {
+    private void addDataToCache(Series series) {
         seriesDataCache.setFullSeries(series);
-        Map<Long, VolumeDomainObject> querySeries = new HashMap<>(series);
-        long endTimeValue = endTime.getTime();
-        for(int i=0; i< backwardStep; i++){
-            long currTimeValue = endTimeValue - i*sampleInterval;
-            querySeries.remove(currTimeValue);
-        }
-        seriesDataCache.setQuerySeries(querySeries);
+        Series dataSeries = new Series(startDate.getTime(), sampleInterval, sampleNumber, series.getDataSeries());
+        seriesDataCache.setQuerySeries(dataSeries);
     }
 
 }

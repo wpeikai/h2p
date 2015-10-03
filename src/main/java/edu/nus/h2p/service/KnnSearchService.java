@@ -1,9 +1,8 @@
 package edu.nus.h2p.service;
 
+import edu.nus.h2p.model.Series;
 import edu.nus.h2p.model.SeriesDataCache;
 import edu.nus.h2p.model.SlidingWindowDistanceItem;
-import edu.nus.h2p.model.VolumeDomainObject;
-import edu.nus.h2p.util.SeriesUtil;
 import edu.nus.h2p.util.dtw.IDtw;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,47 +23,30 @@ public class KnnSearchService {
 
     @Autowired
     private IDtw lbKeoghDwt;
-    public List<Map<Long, VolumeDomainObject>> querySimilarSeries(Map<Long, VolumeDomainObject> query){
-        List<Map<Long, VolumeDomainObject>> similarSeriesCollection = new ArrayList<>();
-        List<Map<Long, VolumeDomainObject>> querySlidingWindows = convertSeriesToSW(query);
-        List<Map<Long, VolumeDomainObject>> dataSlidingWindows = convertSeriesToSW(seriesDataCache.getQuerySeries());
-        Map<Integer, Map<Integer,SlidingWindowDistanceItem>> windowLevelIndexTable = buildWindowLevelIndexTable(querySlidingWindows, dataSlidingWindows);
+    public List<Series> querySimilarSeries(Series querySeries){
+        List<Series> similarSeriesCollection = new ArrayList<>();
+        SlidingWindowDistanceItem[][] windowLevelIndexTable = buildWindowLevelIndexTable(querySeries);
 
         return similarSeriesCollection;
     }
 
-    private Map<Integer, Map<Integer, SlidingWindowDistanceItem>> buildWindowLevelIndexTable(List<Map<Long, VolumeDomainObject>> querySlidingWindows, List<Map<Long, VolumeDomainObject>> dataSlidingWindows) {
-        Map<Integer, Map<Integer,SlidingWindowDistanceItem>> windowLevelIndexTable = new HashMap<>();
-        for(int d=0; d< dataSlidingWindows.size(); d++){
-            Map<Integer,SlidingWindowDistanceItem> swIndexColumn = new HashMap<>();
-            for(int q=0; q<querySlidingWindows.size(); q++){
-                Map<Long, VolumeDomainObject> querySeries = querySlidingWindows.get(q);
-                Map<Long, VolumeDomainObject> dataSeries = dataSlidingWindows.get(d);
-                double[] queryValues = SeriesUtil.getSeriesValueArray(querySeries);
-                double[] dataValues = SeriesUtil.getSeriesValueArray(dataSeries);
+    public SlidingWindowDistanceItem[][] buildWindowLevelIndexTable(Series series) {
+        List<Series> querySWSeries = series.convertToSubSeriesList(windowSize);
+        List<Series> dataSWSeries = seriesDataCache.getQuerySeries().convertToSubSeriesList(windowSize);
+        SlidingWindowDistanceItem[][] indexTable = new SlidingWindowDistanceItem[querySWSeries.size()][dataSWSeries.size()];
+        for(int d=0; d< dataSWSeries.size(); d++){
+            //LOOP FOR QUERY WINDOW
+            for(int q=0; q< querySWSeries.size(); q++){
+                Series querySeries = querySWSeries.get(q);
+                Series dataSeries = dataSWSeries.get(d);
+                double[] queryValues = querySeries.getValueDoubleArray();
+                double[] dataValues = dataSeries.getValueDoubleArray();
                 double lowerBoundQuery = lbKeoghDwt.compute(queryValues, dataValues);
                 double lowerBoundComponent = lbKeoghDwt.compute(dataValues, queryValues);
                 SlidingWindowDistanceItem item = new SlidingWindowDistanceItem(q, d, lowerBoundQuery, lowerBoundComponent);
-                swIndexColumn.put(q, item);
+                indexTable[q][d] = item;
             }
-            windowLevelIndexTable.put(d, swIndexColumn);
         }
-        return windowLevelIndexTable;
-    }
-
-    public List<Map<Long, VolumeDomainObject>> convertSeriesToSW(Map<Long, VolumeDomainObject> series) {
-        List<Map<Long, VolumeDomainObject>> swList = new ArrayList<>();
-        List<Long> timeList = new ArrayList<>(series.keySet());
-        Collections.sort(timeList);
-        for(int i=0; i<timeList.size(); i+= windowSize){
-            Map<Long, VolumeDomainObject> windowSizeSeries = new HashMap<>();
-            for(int j=0; j<windowSize; j++){
-                int index = i + j;
-                Long key = timeList.get(index);
-                windowSizeSeries.put(key, series.get(key));
-            }
-            swList.add(windowSizeSeries);
-        }
-        return swList;
+        return indexTable;
     }
 }

@@ -7,6 +7,9 @@ package edu.nus.h2p.model;
 public class VolumeItem implements IData<Integer>{
     private Integer data;
 
+    public VolumeItem(){
+        data = 0;
+    }
     @Override
     public Integer getValue() {
         return data;
@@ -21,4 +24,5 @@ public class VolumeItem implements IData<Integer>{
     public void increaseValue() {
         data++;
     }
+
 }

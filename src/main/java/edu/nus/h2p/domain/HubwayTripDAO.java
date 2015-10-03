@@ -25,13 +25,13 @@ public class HubwayTripDAO extends JdbcDaoSupport implements IHubwayTripDAO {
 
     @Override
     public List<HubwayTrip> getHubwayTripInTimeRangeAndStations(Date startTime, Date endTime, int  startStation, int endStation){
-        final String sql = "SELECT start_date, end_date, strt_statn, end_statn FROM hubway.trips where start_date > ? and start_date < ? and strt_statn = ? and end_statn = ?";
+        final String sql = "SELECT start_date, end_date, strt_statn, end_statn FROM hubway.trips where start_date > ? and end_date < ? and strt_statn = ? and end_statn = ? and start_date != trips.end_date";
         return getJdbcTemplate().query(sql,new Object[]{startTime, endTime, startStation, endStation}, new HubwayTripRowMapper());
     }
 
     @Override
     public List<HubwayTrip> getHubwayTripInTimeRange(Date startTime, Date endTime) {
-        final String sql = "SELECT start_date, end_date, strt_statn, end_statn FROM hubway.trips where start_date > ? and start_date < ?";
+        final String sql = "SELECT start_date, end_date, strt_statn, end_statn FROM hubway.trips where start_date > ? and end_date < ? and start_date != trips.end_date";
         return getJdbcTemplate().query(sql,new Object[]{startTime, endTime}, new HubwayTripRowMapper());
     }
 }

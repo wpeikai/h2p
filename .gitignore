@@ -13,3 +13,7 @@ hs_err_pid*
 
 #target
 target/
+src/main/resources/Spring-Module.xml
+*.xml
+src/test/resources/testConfiguration.properties
+.gitignore
